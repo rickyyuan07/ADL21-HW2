@@ -25,7 +25,7 @@ def same_seeds(seed):
 # same_seeds(0)
 
 # Change "fp16_training" to True to support automatic mixed precision training (fp16)	
-fp16_training = False
+fp16_training = True
 if fp16_training:
     from accelerate import Accelerator
     accelerator = Accelerator(fp16=True)
@@ -95,7 +95,7 @@ def read_data(file, from_test=False):
         questions['paragraph_id'] = [x['relevant'] for x in data]
         questions['answer_text'] = [x['answer']['text'] for x in data]
         questions['answer_start'] = [x['answer']['start'] for x in data]
-        questions['answer_end'] = [(x['answer']['start'] + len(x['answer']['text'])) for x in data]
+        questions['answer_end'] = [(x['answer']['start'] + len(x['answer']['text']) - 1) for x in data]
         paragraphs = context
     else:
         questions['paragraph_id'] = list(range(len(data)))
@@ -154,7 +154,7 @@ def evaluate(data, output):
         end_prob, end_index = torch.max(output.end_logits[k], dim=0)
         start_matrix, end_matrix = output.start_logits[k].unsqueeze(1), output.end_logits[k].unsqueeze(0)
         matrix = torch.matmul(start_matrix, end_matrix)
-        print(tokenizer.decode(data[0][0][k]))
+        # print(tokenizer.decode(data[0][0][k]))
         # print(matrix.shape)
         # print(torch.argmax(matrix, keepdim=False) // matrix.shape[0], torch.argmax(matrix, keepdim=False) % matrix.shape[0])
         # print(start_index, end_index)
@@ -384,8 +384,8 @@ model.eval()
 with torch.no_grad():
     for i, data in enumerate(tqdm(test_questions)):
         nlp = QuestionAnsweringPipeline(model=model, tokenizer=tokenizer, task='question-answering', device=0)
-        context = ''.join([test_paragraphs[x] for x in data['paragraph_id']])
-        result.append(nlp(question=data['question_text'], context=context)['answer'])
+        # context = ''.join([test_paragraphs[x] for x in data['paragraph_id']])
+        result.append(nlp(question=data['question_text'], context=test_paragraphs[data['paragraph_id']])['answer'])
         # output = model(input_ids=data[0].squeeze(dim=0).to(device), token_type_ids=data[1].squeeze(dim=0).to(device),
         #                attention_mask=data[2].squeeze(dim=0).to(device))
         # # result.append(evaluate(data, output))

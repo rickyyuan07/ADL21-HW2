@@ -10,10 +10,10 @@ class QA_Dataset(Dataset):
         self.tokenized_questions = tokenized_questions
         self.tokenized_paragraphs = tokenized_paragraphs
         self.max_question_len = 40
-        self.max_paragraph_len = 150
+        self.max_paragraph_len = 300
         
         ##### TODO: Change value of doc_stride #####
-        self.doc_stride = 150
+        self.doc_stride = 75
 
         # Input sequence length = [CLS] + question + [SEP] + paragraph + [SEP]
         self.max_seq_len = 1 + self.max_question_len + 1 + self.max_paragraph_len + 1
